@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Interactive Canvas</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.4.0/fabric.min.js"></script>
+  <button id="save-btn">Save</button>
+  <input type="file" id="load-file-input">
+  <button id="load-btn">Load</button>
+  <style>
+    #removeButton {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      border-radius: 10px;
+      background-color: lightgray;
+      padding: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <input id="rows" type="range" min="3" max="20" value="5">
+    <span id="rows-value"></span>
+  </div>
+  <div>
+    <input id="cols" type="range" min="3" max="20" value="5">
+    <span id="cols-value"></span>
+  </div>
+  <canvas id="canvas"></canvas>
+  <div id="removeButton">x</div>
+  <script src="your-script.js"></script>
+</body>
+</html>
+
+
