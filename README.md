@@ -15,15 +15,17 @@ This is one of my dream projects to create. I've always liked those dotted noteb
 
 # Files
 1. main.html
-    - 
+    - dada
 2. your-script.js
     - Save button not working
     - Choose file is working tho
 
 
 # Things to do still
-[ ] Snap properly at the center
-[ ] Ability to cut off lines for any intersections
-[ ] keyboard shortcuts to change colors
-[ ] keyboard shortcuts to change line thickness
-[ ] Main menu to show the different types of grids
+- [ ] Snap properly at the center
+- [ ] Ability to cut off lines for any intersections
+- [ ] keyboard shortcuts to change colors
+- [ ] keyboard shortcuts to change line thickness
+- [ ] Main menu to show the different types of grids
+- [ ] Add css using bootstrap?
+- [ ] Make it touch compatible if using a phone
