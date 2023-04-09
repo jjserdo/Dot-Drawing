@@ -1,4 +1,4 @@
-<a href="main.html">Draw now</a>
+[Link text](main.html)
 # Dot-Drawing
 This is one of my dream projects to create. I've always liked those dotted notebooks. Square, Triangle, Etc. I would sometimes just connect and draw random dots together until I was able to form a cohesive shape that looks cool. In this project, I dream of being able to do that everytime I'm bored and I have my laptop with me and not a notebook.
 
