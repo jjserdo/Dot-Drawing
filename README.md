@@ -16,7 +16,7 @@ This is one of my dream projects to create. I've always liked those dotted noteb
 
 # Files
 1. main.html
-    - dada
+    - Main html code
 2. your-script.js
     - Save button not working
     - Choose file is working tho
@@ -30,3 +30,7 @@ This is one of my dream projects to create. I've always liked those dotted noteb
 - [ ] Main menu to show the different types of grids
 - [ ] Add css using bootstrap?
 - [ ] Make it touch compatible if using a phone
+- [ ] Save functionality
+    - [ ] saves rows and columns into a 2d array
+    - [ ] creates an (N,2,2) array which is a list of all of the two points which has coordinates (x,y) 
+- [ ] line creation doesn't even work anymore lmao

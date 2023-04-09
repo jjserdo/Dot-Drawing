@@ -13,6 +13,7 @@ let DOT_RADIUS = 15;
 
 let NUM_ROWS = sliderRows.value;
 let NUM_COLS = sliderCols.value;
+
 sliderRowsValue.textContent = NUM_ROWS;
 sliderColsValue.textContent = NUM_COLS;
 
@@ -65,14 +66,14 @@ canvas.on('mouse:down', event => {
     // Clicked on a dot
     startDot = target;
     let center = startDot.getCenterPoint();
-    line = new fabric.Line([(startDot.x + 0.25) * (canvas.width / NUM_COLS) + DOT_RADIUS, (startDot.y + 0.25) * (canvas.height / NUM_ROWS) + DOT_RADIUS, center.x, center.y], {
+    line = new fabric.Line([center.x, center.y, center.x, center.y], {
       stroke: 'black',
       strokeWidth: 3,
-      snapToGrid: 0.5, // Snap to half a dot width/height
-      snapAngle: 45, // Snap to 45 degree increments
-      lockMovementX: true, // Lock horizontal movement
-      lockMovementY: true // Lock vertical movement
+      originX: 'center',
+      originY: 'center',
     });
+    line.startDot = startDot; // Set the 'startDot' property
+    lines.push(line); // Push the line into the 'lines' array
     canvas.add(line);
   }
 });
@@ -86,19 +87,20 @@ canvas.on('mouse:move', event => {
 });
 
 canvas.on('mouse:up', event => {
-  let line = lines[lines.length - 1];
-  if (line !== undefined) {
+  if (line !== null) {
     let target = event.target;
     if (target instanceof fabric.Circle && target !== line.startDot) {
       // Released over another dot
       let center = target.getCenterPoint();
-      line.set({ x2: (target.x + 0.25) * (canvas.width / NUM_COLS) + DOT_RADIUS, y2: (target.y + 0.25) * (canvas.height / NUM_ROWS) + DOT_RADIUS });
-      line.snapTo('center', target); // Snap to the center of the target dot
+      line.set({ x2: center.x, y2: center.y });
+      line.endDot = target; // Set the 'endDot' property
     } else {
       // Released outside a dot
       canvas.remove(line);
       lines.pop();
     }
+    line = null;
+    startDot = null;
   }
 });
 
