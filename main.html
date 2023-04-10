@@ -3,42 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <title>Interactive Canvas</title>
+  <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.4.0/fabric.min.js"></script>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  <button id="save-btn">Save</button>
-  <input type="file" id="load-file-input">
-  <button id="load-btn">Load</button>
-  <style>
-    #removeButton {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      border-radius: 10px;
-      background-color: lightgray;
-      padding: 10px;
-      cursor: pointer;
-    }
-  </style>
 </head>
+
 <body>
-  <div style="display: flex; justify-content: center; align-items: center;">
-  <h1>Your Title</h1>
-</div>
-  <div>
-    <input id="rows" type="range" min="3" max="20" value="5">
-    <span id="rows-value"></span>
+  <h1>dotDrawing</h1>
+  <div class="button-container">
+    <button id="save-btn" class="d-inline-block">Save</button>
+    <input type="file" id="file-input" class="d-inline-block" style="display:none;">
+    <!-- Add this inside the body, preferably after the save button -->
+    <p id="save-message" style="display: none;">Board saved successfully!</p>
+    <button id="load-btn" class="d-inline-block">Load</button>
+    <button id="settings-btn">Settings</button>
   </div>
-  <div>
-    <input id="cols" type="range" min="3" max="20" value="5">
-    <span id="cols-value"></span>
+
+  <div id="settings-window">
+    <div class="settings">
+      <label for="cols">Rows:</label>
+      <input id="rows" type="range" min="3" max="20" value="5">
+      <span id="rows-value"></span>
+    </div>
+    <div class="settings">
+      <label for="cols">Cols:</label>
+      <input id="cols" type="range" min="3" max="20" value="5">
+      <span id="cols-value"></span>
+    </div>
   </div>
-  <canvas id="canvas"></canvas>
-  <div id="removeButton">x</div>
+
+  <div id="canvas-container">
+    <canvas id="canvas"></canvas>
+    <button id="rmv-btn">x</button>
+  </div>
   <script src="your-script.js"></script>
 </body>
+
 </html>
 
 

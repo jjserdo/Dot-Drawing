@@ -1,8 +1,7 @@
 // Create canvas
-let canvas = new fabric.Canvas('canvas', {
-  width: window.innerWidth,
-  height: window.innerHeight
-});
+let canvas = new fabric.Canvas('canvas');
+canvas.setWidth(window.innerWidth);
+canvas.setHeight(window.innerHeight);
 canvas.selection = false;
 canvas.perPixelTargetFind = true;
 
@@ -11,12 +10,12 @@ const sliderRows = document.getElementById('rows');
 const sliderCols = document.getElementById('cols');
 const sliderRowsValue = document.getElementById('rows-value');
 const sliderColsValue = document.getElementById('cols-value');
+const settingsBtn = document.getElementById('settings-btn');
+const settingsWindow = document.getElementById('settings-window');
 
 // Set default values for dot and grid properties
-const DOT_COUNT = 25; 
-let DOT_RADIUS = 10;
-let NUM_ROWS = sliderRows.value;
-let NUM_COLS = sliderCols.value;
+let NUM_ROWS = 5;
+let NUM_COLS = 5;
 sliderRowsValue.textContent = NUM_ROWS;
 sliderColsValue.textContent = NUM_COLS;
 
@@ -25,6 +24,7 @@ let lines = [];
 let line = null;
 let startDot = null;
 let dots = [];
+load = false;
 
 // Add slider event listeners
 sliderRows.addEventListener('input', event => {
@@ -39,11 +39,21 @@ sliderCols.addEventListener('input', event => {
   updateDots();
 });
 
+settingsBtn.addEventListener('click', () => {
+  const currentDisplay = settingsWindow.style.display;
+  settingsWindow.style.display = currentDisplay === 'none' ? 'block' : 'none';
+});
+
+lines = [];
 // Update dots on the canvas
 function updateDots() {
   canvas.clear();
   dots = [];
-  lines = [];
+  
+  // Loop through all the lines on the canvas and remove them
+  canvas.getObjects('line').forEach(function(line) {
+    canvas.remove(line);
+  });
 
   // Calculate the radius of the dots based on the number of rows and columns
   DOT_RADIUS = Math.min(canvas.width / NUM_COLS, canvas.height / NUM_ROWS) / 8;
@@ -53,20 +63,57 @@ function updateDots() {
       let dot = new fabric.Circle({
         left: (col + 0.25) * (canvas.width / NUM_COLS),
         top: (row + 0.25) * (canvas.height / NUM_ROWS),
+        cx: (col + 0.25) * (canvas.width / NUM_COLS) + DOT_RADIUS + 0.5,
+        cy: (row + 0.25) * (canvas.height / NUM_ROWS) + DOT_RADIUS + 0.5,
+        row: row,
+        col: col,
         radius: DOT_RADIUS,
-        fill: 'black',
+        fill: 'blue',
         selectable: false,
-        hoverCursor: 'pointer'
+        hoverCursor: 'pointer',
+        opacity: 0.3
       });
       dots.push(dot);
       canvas.add(dot);
     }
   }
+
+  lines.forEach(lineData => {
+    wawa = dots.find(dot => dot.row == lineData.startDot.row && dot.col == lineData.startDot.col );
+    dada = dots.find(dot => dot.row == lineData.endDot.row && dot.col == lineData.endDot.col );
+    lmao = new fabric.Line([wawa.cx, wawa.cy, dada.cx, dada.cy], { 
+      stroke: 'black',
+      strokeWidth: 3,
+      originX: 'center',
+      originY: 'center',
+      startDot: wawa,
+      endDot: dada
+    });
+    console.log(lmao);
+    canvas.add(lmao);
+  });
 }
 
 updateDots();
 
-canvas.on('mouse:down', event => {
+// Function to toggle background color
+function toggleBackgroundColor() {
+  const currentBgColor = canvas.backgroundColor;
+  const newBgColor = currentBgColor === 'white' ? 'lightgray' : 'white';
+  canvas.setBackgroundColor(newBgColor, canvas.renderAll.bind(canvas));
+}
+ 
+// Function to toggle dots visibility
+function toggleDotsVisibility() {
+  dots.forEach(dot => {
+    dot.visible = !dot.visible;
+  });
+  canvas.renderAll();
+}
+
+// Add touch event listeners to make the canvas work smoothly on mobile devices and tablets
+canvas.on('touch:start', function(event) {
+  load = false
   let target = event.target;
   if (target instanceof fabric.Circle) {
     // Clicked on a dot
@@ -75,36 +122,86 @@ canvas.on('mouse:down', event => {
     line = new fabric.Line([center.x, center.y, center.x, center.y], {
       stroke: 'black',
       strokeWidth: 3,
-      originX: 'center',
-      originY: 'center',
+      x1: center.x,
+      y1: center.y
     });
-    line.startDot = startDot; // Set the 'startDot' property
+    line.startDot = getRowColFromCoordinates(startDot.left, startDot.top);
+    line.me = startDot // Set the 'startDot' property
+    lines.push(line); // Push the line into the 'lines' array
+    canvas.add(line);
+  }
+  });
+
+canvas.on('touch:move', function(event) {
+  if (load == true) {
+    return;
+  }
+  if (line !== null) {
+    let mouse = canvas.getPointer(event.e);
+    line.set({ x2: mouse.x, y2: mouse.y });
+    canvas.renderAll();
+  }
+}); 
+
+canvas.on('touch:end', function(event) {
+  if (line !== null) {
+    let target = event.target;
+    if (target instanceof fabric.Circle && target !== line.me) {
+      // Released over another dot
+      let center = target.getCenterPoint();
+      line.set({ x2: center.x, y2: center.y });
+      line.endDot = getRowColFromCoordinates(target.left, target.top); // Set the 'endDot' property
+    } else {
+      // Released outside a dot
+      canvas.remove(line);
+      lines.pop();
+    }
+    line = null;
+    startDot = null;
+  }
+});
+
+
+
+canvas.on('mouse:down', event => {
+  load = false
+  let target = event.target;
+  if (target instanceof fabric.Circle) {
+    // Clicked on a dot
+    startDot = target;
+    let center = startDot.getCenterPoint();
+    line = new fabric.Line([center.x, center.y, center.x, center.y], {
+      stroke: 'black',
+      strokeWidth: 3,
+      x1: center.x,
+      y1: center.y
+    });
+    line.startDot = getRowColFromCoordinates(startDot.left, startDot.top);
+    line.me = startDot // Set the 'startDot' property
     lines.push(line); // Push the line into the 'lines' array
     canvas.add(line);
   }
 });
 
 canvas.on('mouse:move', event => {
+  if (load == true) {
+    return;
+  }
   if (line !== null) {
     let mouse = canvas.getPointer(event.e);
     line.set({ x2: mouse.x, y2: mouse.y });
     canvas.renderAll();
   }
-});
+}); 
 
 canvas.on('mouse:up', event => {
   if (line !== null) {
     let target = event.target;
-    if (target instanceof fabric.Circle && target !== line.startDot) {
+    if (target instanceof fabric.Circle && target !== line.me) {
       // Released over another dot
       let center = target.getCenterPoint();
       line.set({ x2: center.x, y2: center.y });
-      line.endDot = target; // Set the 'endDot' property
-
-      let startDotRowCol = getRowColFromCoordinates(line.startDot.left, line.startDot.top);
-      let endDotRowCol = getRowColFromCoordinates(line.endDot.left, line.endDot.top);
-      lines.push({ start: startDotRowCol, end: endDotRowCol });
-
+      line.endDot = getRowColFromCoordinates(target.left, target.top); // Set the 'endDot' property
     } else {
       // Released outside a dot
       canvas.remove(line);
@@ -123,6 +220,7 @@ document.addEventListener('keydown', event => {
       startDot = null;
     }
   }
+
   if (event.keyCode === 32) {
     // Space bar pressed
     if (lines.length > 0) {
@@ -130,50 +228,25 @@ document.addEventListener('keydown', event => {
       canvas.remove(line);
     }
   }
+
+  if (event.key === 'i' || event.key === 'I') {
+    toggleDotsVisibility();
+  }
+
+  if (event.key === 'b' || event.key === 'B') {
+    toggleBackgroundColor();
+  }
 });
 
 
 // Add a click event listener to the remove button
-removeButton.addEventListener('click', function() {
+document.getElementById('rmv-btn').addEventListener('click', function() {
+  localStorage.removeItem('dotBoard');
+
   // Loop through all the lines on the canvas and remove them
   canvas.getObjects('line').forEach(function(line) {
     canvas.remove(line);
   });
-});
-
-// Save button event listener
-document.getElementById('save-button').addEventListener('click', () => {
-  // Prepare lines data to save only relevant properties
-  const preparedLines = lines.map(line => {
-    const startDotRowCol = getRowColFromCoordinates(line.startDot.left, line.startDot.top);
-    const endDotRowCol = getRowColFromCoordinates(line.endDot.left, line.endDot.top);
-    return { start: startDotRowCol, end: endDotRowCol };
-  });
-
-  // Construct the data to be saved
-  const saveData = {
-    rows: NUM_ROWS,
-    cols: NUM_COLS,
-    lines: lines
-  };
-
-  // Convert the data to a JSON string
-  const saveDataString = JSON.stringify(saveData);
-
-    // Create a Blob from the JSON string
-  const saveDataBlob = new Blob([saveDataString], { type: 'text/plain;charset=utf-8' });
-
-  // Create a URL for the Blob
-  const saveDataURL = URL.createObjectURL(saveDataBlob);
-
-  // Create a download link with the data and click it to open the file explorer
-  const downloadLink = document.createElement('a');
-  downloadLink.href = saveDataURL;
-  downloadLink.download = 'interactive-canvas-save.txt';
-  downloadLink.click();
-
-  // Clean up the URL object to avoid memory leaks
-  URL.revokeObjectURL(saveDataURL);
 });
 
 // Load button functionality
@@ -211,6 +284,64 @@ fileInput.addEventListener('change', event => {
   reader.readAsText(file);
 });
 
+// Save button event listener
+document.getElementById('save-btn').addEventListener('click', () => {
+  // Get all the line objects on the canvas
+  const lineObjects = canvas.getObjects('line');
+
+  // If there are no lines on the canvas, do nothing
+  if (lineObjects.length === 0) {
+    return;
+  }
+
+  // Prepare lines data to save only relevant properties
+  const preparedLines = lineObjects.map(line => {
+    const startDotRowCol = line.startDot;
+    const endDotRowCol = line.endDot;
+    return { start: startDotRowCol, end: endDotRowCol };
+  });
+
+  const version = '4/10M scaled lines'
+
+  // Construct the data to be saved
+  const saveData = {
+    rows: NUM_ROWS,
+    cols: NUM_COLS,
+    lines: preparedLines,
+    vers: version
+  };
+
+  /*
+  // Convert the data to a JSON string
+  const saveDataString = JSON.stringify(saveData);
+
+    // Create a Blob from the JSON string
+  const saveDataBlob = new Blob([saveDataString], { type: 'text/plain;charset=utf-8' });
+
+  // Create a URL for the Blob
+  const saveDataURL = URL.createObjectURL(saveDataBlob);
+
+  // Create a download link with the data and click it to open the file explorer
+  const downloadLink = document.createElement('a');
+  downloadLink.href = saveDataURL;
+  downloadLink.download = 'interactive-canvas-save.txt';
+  downloadLink.click();
+
+  // Clean up the URL object to avoid memory leaks
+  URL.revokeObjectURL(saveDataURL);
+  */
+  localStorage.setItem('dotBoard', JSON.stringify(saveData));
+
+  // Show the custom message element when the board is saved successfully
+  const saveMessage = document.getElementById('save-message');
+  saveMessage.style.display = 'block';
+
+  // Hide the message after 3 seconds (3000 milliseconds)
+  setTimeout(() => {
+    saveMessage.style.display = 'none';
+  }, 3000);
+});
+
 // Utility functions for converting between row/col and x/y coordinates
 function getCoordinatesFromRowCol(row, col) {
   return {
@@ -221,6 +352,8 @@ function getCoordinatesFromRowCol(row, col) {
 
 function getRowColFromCoordinates(x, y) {
   return {
+    //row: parseFloat((y * NUM_ROWS) / canvas.height - 0.25),
+    //col: parseFloat((x * NUM_COLS) / canvas.width - 0.25)
     row: Math.round((y * NUM_ROWS) / canvas.height - 0.25),
     col: Math.round((x * NUM_COLS) / canvas.width - 0.25)
   };
@@ -241,37 +374,49 @@ function drawLinesFromRowCols() {
   });
 }
 
-/* These are buttons and stuff*/
+// Load saved data from localStorage (if any)
+function loadSavedData() {
+  const savedDataString = localStorage.getItem('dotBoard');
+  if (!savedDataString) {
+    return; // No saved data found
+  }
 
-// Add the remove button to the page
-let removeButton = document.createElement('div');
-removeButton.style.position = 'absolute';
-removeButton.style.bottom = '20px';
-removeButton.style.right = '20px';
-removeButton.style.borderRadius = '10px';
-removeButton.style.backgroundColor = 'lightgray';
-removeButton.style.padding = '10px';
-removeButton.style.cursor = 'pointer';
-removeButton.innerHTML = 'x';
-document.body.appendChild(removeButton);
+  const savedData = JSON.parse(savedDataString);
 
-let toggleDotsButton = document.createElement('div');
-toggleDotsButton.style.position = 'absolute';
-toggleDotsButton.style.bottom = '60px';
-toggleDotsButton.style.right = '20px';
-toggleDotsButton.style.borderRadius = '10px';
-toggleDotsButton.style.backgroundColor = 'lightgray';
-toggleDotsButton.style.padding = '10px';
-toggleDotsButton.style.cursor = 'pointer';
-toggleDotsButton.innerHTML = 'Toggle Dots';
-document.body.appendChild(toggleDotsButton);
+  // Set up the proper rows and columns
+  NUM_ROWS = savedData.rows;
+  NUM_COLS = savedData.cols;
 
-toggleDotsButton.addEventListener('click', function() {
-  dots.forEach(dot => {
-    dot.visible = !dot.visible;
+  // Update sliders
+  sliderRows.value = NUM_ROWS;
+  sliderCols.value = NUM_COLS;
+  sliderRowsValue.textContent = NUM_ROWS;
+  sliderColsValue.textContent = NUM_COLS;
+
+  // Clear existing board and generate a new one
+  updateDots();
+
+  // Set up lines (if any)
+  savedData.lines.forEach(lineData => {
+    const startDot = dots.find(dot => dot.row == lineData.start.row & dot.col == lineData.start.col );
+    const endDot = dots.find(dot => dot.row == lineData.end.row & dot.col == lineData.end.col );
+    line = new fabric.Line([startDot.cx, startDot.cy, endDot.cx, endDot.cy], {
+      stroke: 'black',
+      strokeWidth: 3,
+      originX: 'center',
+      originY: 'center',
+      startDot: lineData.start,
+      endDot: lineData.end
+    });
+    line.set({ x2: endDot.cx, y2: endDot.cy });
+    lines.push(line); 
+    canvas.add(line);
   });
-  canvas.renderAll();
-});
+  load = true
+}
+
+loadSavedData();
+
 
 /* 
   Make it touch-compatible: You can use Fabric.js touch event listeners (e.g., 'touch:gesture', 'touch:drag', 'touch:orientation', and 'touch:shake') to handle touch interactions on mobile devices. Refer to the Fabric.js documentation for more details: http://fabricjs.com/events
