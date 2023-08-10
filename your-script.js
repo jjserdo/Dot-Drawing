@@ -5,6 +5,15 @@ canvas.setHeight(window.innerHeight);
 canvas.selection = false;
 canvas.perPixelTargetFind = true;
 
+// Tweakpane GUI
+const Tweakpane = require('tweakpane');
+const params = {
+  GRID: 
+  NUM_ROWS: 10,
+  NUM_COLS: 10;
+  scaleMax: 30,
+};
+
 // Initialize slider elements
 const sliderRows = document.getElementById('rows');
 const sliderCols = document.getElementById('cols');
@@ -13,11 +22,8 @@ const sliderColsValue = document.getElementById('cols-value');
 const settingsBtn = document.getElementById('settings-btn');
 const settingsWindow = document.getElementById('settings-window');
 
-// Set default values for dot and grid properties
-let NUM_ROWS = 5;
-let NUM_COLS = 5;
-sliderRowsValue.textContent = NUM_ROWS;
-sliderColsValue.textContent = NUM_COLS;
+sliderRowsValue.textContent = params.NUM_ROWS;
+sliderColsValue.textContent = params.NUM_COLS;
 
 // Initialize lines and dots arrays
 let lines = [];
@@ -442,3 +448,22 @@ Layer management: Implement layer functionality so users can organize their line
 These features can be implemented using Fabric.js's built-in functionality, as well as with additional JavaScript libraries if needed.
 */
 
+const createPane = () => {
+  const pane = new Tweakpane.Pane();
+  let folder;
+
+  folder = pane.addFolder({ title: 'Grid'});
+  folder.addInput(params, 'lineCap', { options: {butt: 'butt', round: 'round', square: 'square'}});
+  folder.addInput(params, 'cell', {min: 2, max: 50, step: 1});
+  folder.addInput(params, 'scaleMin', {min: 1, max: 100});
+  folder.addInput(params, 'scaleMax', {min: 1, max: 100});
+
+  folder = pane.addFolder({ title: 'Animation'});
+  folder.addInput(params, 'animate');
+  folder.addInput(params, 'frame', {min: 0, max: 999});
+  folder.addInput(params, 'words')
+}
+
+createPane();
+//http://fabricjs.com/fabric-intro-part-1#why_fabric
+//http://fabricjs.com/docs/fabric.Circle.html

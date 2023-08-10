@@ -43,3 +43,4 @@ This is one of my dream projects to create. I've always liked those dotted noteb
 - [/] center the title
 - [/] how do I see what the lines are storing
 - [?] if changing the slider then store the lines and then just remove the right and bottom rows or smth
+- [ ]
